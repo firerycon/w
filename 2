@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>view log </title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <script type="text/javascript">
+        window.onload = ShowLog;
+        function ShowLog() {
+            //get parameter value from url
+            var url = window.location.toString();
+            var the_request = "";
+
+            if (url.indexOf("?") != -1) {
+                var ary = url.split("?")[1].split("&");
+                for (var i in ary) {
+                    the_request += ary[i].split("=")[1];
+                }
+            }
+            //show file path
+            document.getElementById("view_txt_here").innerHTML = "now reading file [" + the_request + "] ...please wait";
+            //open file
+            var request = null;
+            if (window.XMLHttpRequest) {
+                request = new XMLHttpRequest();
+            }
+            else if (window.ActiveXObject) {
+                request = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            if (request) {
+                request.open("GET", the_request, true);
+                request.onreadystatechange = function () {
+                    //show status
+                    if (request.readyState == 0) {
+                        document.getElementById("ready").innerHTML = "檔案讀取狀態</br> 0：請求初始化" + request.status + "，請稍候";
+                    }
+                    if (request.readyState == 1) {
+                        document.getElementById("ready").innerHTML = "檔案讀取狀態</br> 1：連接已建立" + request.status + "，請稍候";
+                    }
+                    if (request.readyState == 2) {
+                        document.getElementById("ready").innerHTML = "檔案讀取狀態</br> 2：請求已接收" + request.status + "，請稍候";
+                    }
+                    if (request.readyState == 3) {
+                        document.getElementById("ready").innerHTML = "檔案讀取狀態</br> 3：請求處理中" + request.status + "，請稍候";
+                    }
+                    if (request.readyState == 4) {
+                        if (request.status == 200 || request.status == 0) {
+                            //show file content
+                            document.getElementById("ready").innerHTML = "檔案讀取狀態</br> success";
+                            document.getElementById("view_txt_here").innerHTML = request.responseText;
+                        }
+                    }
+                }
+                request.send(null);
+            }
+            else {
+                alert("error");
+            }
+        }
+    </script>
+</head>
+<body>
+    <pre id="ready"></pre>
+    <p>
+        ==================================================</p>
+    <span>
+        <pre>
+<xmp id="view_txt_here"></xmp></pre>
+    </span>
+</body>
+</html>
