@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>view log </title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <script type="text/javascript">
+        window.onload = getlist;
+        var parent_path = ["FDCFDTLog"]; //parent folder name of all log
+
+        //get parameter value from url
+        var url = window.location.toString();
+        var the_request = "";
+
+        if (url.indexOf("?") != -1) {
+            var ary = url.split("?")[1].split("&");
+            for (var i in ary) {
+                the_request += ary[i].split("=")[1];
+                //parent_path = the_request.split("%");
+            }
+        }
+        parent_path = the_request.split("*");
+        function getlist() {
+            var request = null;
+            if (window.XMLHttpRequest) {
+                request = new XMLHttpRequest();
+            } else if (window.ActiveXObject) {
+                request = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            if (request) {
+                var next_path = [];
+                request.open("GET", 'list.txt', true);
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4) {
+                        if (request.status == 200 || request.status == 0) {
+                            //show file list
+                            var str = request.responseText;
+                            //parse file list
+                            //var res = str.split("\n");
+                            var res = str.split("D:\\jboss-as-7.1.1.Final\\welcome-content\\html5_open_txt\\"); //use the root folder of logs
+
+                            for (i = 1; i < res.length; i++) {
+
+                                //slice the last char(\n) of path
+                                res[i] = res[i].slice(0, -2);
+                                var btn_value = res[i].toString();
+
+                                //replace \ to /
+                                btn_value = btn_value.replace(/\\/g, "/");
+                                if (btn_value.slice(-4) == ".log") {
+                                    //print the paths
+                                    var btn = document.createElement("p");
+                                    if (btn_value.indexOf(parent_path.join("/")) > -1) {
+                                        btn.innerHTML = '<a href="showcontent.html?file=' + btn_value + '" target="_blank">' + btn_value + '</a>';
+                                        document.getElementById("btn").appendChild(btn);
+                                    }
+                                }
+                                else {
+                                    var folder_view = document.createElement("p");
+                                    var folder_array = btn_value.split("/");
+                                    if (folder_array[parent_path.length]) {
+                                        //1. avoid repeat push folder name into array                   2. set parent path
+                                        if (next_path.indexOf(folder_array[parent_path.length]) == -1 && btn_value.indexOf(parent_path.join("/")) > -1) {
+                                            next_path.push(folder_array[parent_path.length]);
+                                        }
+
+                                    }
+                                }
+                            }
+
+                            for (j = 0; j < next_path.length; j++) {
+                                var folderbtn = document.createElement("p");
+                                folderbtn.innerHTML = '<a href="showajax.html?path=' + parent_path.join("*") + '*' + next_path[j] + '" target="_self">' + next_path[j] + '</a>';
+                                document.getElementById("folder_list").appendChild(folderbtn);
+                            }
+                        }
+                    }
+                    //document.getElementById("view_txt_here").innerHTML = parent_path;
+                }
+                request.send(null);
+            }
+            else {
+                alert("error");
+            }
+        }
+    </script>
+</head>
+<body>
+<p id="view_txt_here"></p>
+    <p>此資料夾下的資料夾如下</p>
+    <p id="folder_list"></p>
+    <p>可讀取的log清單如下</p>
+    <div id="btn"></div>
+</body>
+</html>
